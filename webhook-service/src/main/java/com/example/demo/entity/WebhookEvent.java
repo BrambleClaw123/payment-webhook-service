@@ -35,4 +35,8 @@ public class WebhookEvent {
     }
 
     public void setStatus(Status status) { this.status = status; }
+    public String getEventId() { return eventId; }
+    public Long getOrderId() { return orderId; }
+    public Long getAmount() { return amount; }
+    public Status getStatus() { return status; }
 }

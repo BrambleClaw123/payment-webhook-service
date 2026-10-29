@@ -28,24 +28,23 @@ public class PaymentProcessor {
     }
 
     @Transactional
-    public void process(WebhookRequest req) {
-        // 1. Ghi event TRƯỚC. Nếu eventId trùng, DB ném lỗi ngay tại đây.
-        WebhookEvent event = new WebhookEvent(
-                req.eventId(), req.type(), req.orderId(), req.amount());
-        events.saveAndFlush(event);
+    public void process(String eventId) {
+        WebhookEvent event = events.findByEventId(eventId)
+                .orElseThrow(() -> new IllegalStateException("Event not found: " + eventId));
 
-        // 2. Nghiệp vụ
-        Order order = orders.findById(req.orderId())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Order not found"));
+        if (event.getStatus() == WebhookEvent.Status.PROCESSED) {
+            return; // tin giao lại lần hai: bỏ qua (consumer idempotent)
+        }
 
-        if (!order.getAmount().equals(req.amount())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Amount mismatch");
+        Order order = orders.findById(event.getOrderId())
+                .orElseThrow(() -> new IllegalStateException("Order not found: " + event.getOrderId()));
+
+        if (!order.getAmount().equals(event.getAmount())) {
+            throw new IllegalStateException("Amount mismatch for event " + eventId);
         }
 
         order.setStatus(Order.Status.PAID);
-        payments.save(new Payment(order.getId(), req.amount(), req.eventId()));
+        payments.save(new Payment(order.getId(), event.getAmount(), eventId));
         event.setStatus(WebhookEvent.Status.PROCESSED);
     }
 }
