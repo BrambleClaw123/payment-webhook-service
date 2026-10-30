@@ -4,6 +4,7 @@ import com.example.demo.dto.WebhookRequest;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.Payment;
 import com.example.demo.entity.WebhookEvent;
+import com.example.demo.exception.NonRetryableException;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.PaymentRepository;
 import com.example.demo.repository.WebhookEventRepository;
@@ -40,11 +41,17 @@ public class PaymentProcessor {
                 .orElseThrow(() -> new IllegalStateException("Order not found: " + event.getOrderId()));
 
         if (!order.getAmount().equals(event.getAmount())) {
-            throw new IllegalStateException("Amount mismatch for event " + eventId);
+            throw new NonRetryableException("Amount mismatch for event " + eventId);
         }
 
         order.setStatus(Order.Status.PAID);
         payments.save(new Payment(order.getId(), event.getAmount(), eventId));
         event.setStatus(WebhookEvent.Status.PROCESSED);
+    }
+
+    @Transactional
+    public void markFailed(String eventId) {
+        events.findByEventId(eventId)
+                .ifPresent(e -> e.setStatus(WebhookEvent.Status.FAILED));
     }
 }

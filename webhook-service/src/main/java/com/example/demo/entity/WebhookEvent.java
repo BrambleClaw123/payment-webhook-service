@@ -8,7 +8,7 @@ import java.time.Instant;
 @Table(name = "webhook_events",
         uniqueConstraints = @UniqueConstraint(columnNames = "event_id"))
 public class WebhookEvent {
-    public enum Status { RECEIVED, PROCESSED }
+    public enum Status { RECEIVED, PROCESSED, FAILED }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
