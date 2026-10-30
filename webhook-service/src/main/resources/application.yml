@@ -19,6 +19,12 @@ spring:
       simple:
         default-requeue-rejected: false
 
+app:
+  rate-limit:
+    enabled: true
+    capacity: 10
+    refill-per-second: 5
+
 management:
   endpoints:
     web:
