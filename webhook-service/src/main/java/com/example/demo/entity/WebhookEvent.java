@@ -26,6 +26,8 @@ public class WebhookEvent {
 
     private Instant receivedAt = Instant.now();
 
+    private Instant lastSweptAt;
+
     protected WebhookEvent() {}
     public WebhookEvent(String eventId, String type, Long orderId, Long amount) {
         this.eventId = eventId;
@@ -39,4 +41,5 @@ public class WebhookEvent {
     public Long getOrderId() { return orderId; }
     public Long getAmount() { return amount; }
     public Status getStatus() { return status; }
+    public void setLastSweptAt(Instant lastSweptAt) { this.lastSweptAt = lastSweptAt; }
 }

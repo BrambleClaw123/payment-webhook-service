@@ -24,6 +24,11 @@ app:
     enabled: true
     capacity: 10
     refill-per-second: 5
+  sweeper:
+    enabled: true
+    interval-ms: 30000
+    min-age-seconds: 60
+
 
 management:
   endpoints:
